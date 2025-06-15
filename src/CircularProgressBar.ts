@@ -22,6 +22,13 @@ interface CircularProgressBarOptions {
   textFont?: string; // 텍스트 폰트 (기본값: "Arial")
   animate?: boolean; // 애니메이션 활성화 (기본값: true)
   duration?: number; // 애니메이션 지속 시간 (기본값: 800ms)
+  // CSS 클래스 커스터마이징
+  className?: string; // SVG 요소에 적용할 CSS 클래스명
+  gaugeClassName?: string; // 게이지 원에 적용할 CSS 클래스명
+  trailClassName?: string; // 트레일 원에 적용할 CSS 클래스명
+  textClassName?: string; // 텍스트에 적용할 CSS 클래스명
+  // 인라인 스타일 비활성화 옵션
+  disableInlineStyles?: boolean; // 인라인 스타일 비활성화 (기본값: false)
 }
 
 /**
@@ -58,6 +65,7 @@ export class CircularProgressBar {
       textFont: "Arial",
       animate: true,
       duration: 800,
+      disableInlineStyles: false,
       ...options,
     };
 
@@ -105,7 +113,16 @@ export class CircularProgressBar {
     this.svg.setAttribute("width", this.options.size.toString());
     this.svg.setAttribute("height", this.options.size.toString());
     this.svg.setAttribute("viewBox", `0 0 ${this.options.size} ${this.options.size}`);
-    this.svg.style.transform = "rotate(-90deg)"; // 상단에서 시작하도록 -90도 회전
+
+    // CSS 클래스 적용
+    if (this.options.className) {
+      this.svg.setAttribute("class", this.options.className);
+    }
+
+    // 인라인 스타일 설정 (비활성화되지 않은 경우에만)
+    if (!this.options.disableInlineStyles) {
+      this.svg.style.transform = "rotate(-90deg)"; // 상단에서 시작하도록 -90도 회전
+    }
 
     // 기본 반지름과 중심점 계산
     const maxStrokeWidth = Math.max(this.options.gaugeWidth!, this.options.trailWidth!);
@@ -124,8 +141,17 @@ export class CircularProgressBar {
     this.trail.setAttribute("cy", centerY.toString());
     this.trail.setAttribute("r", trailRadius.toString());
     this.trail.setAttribute("fill", "none");
-    this.trail.setAttribute("stroke", this.resolveColor(this.options.trailColor!, 0)); // 초기 진행률 0으로 색상 해석
-    this.trail.setAttribute("stroke-width", this.options.trailWidth!.toString());
+
+    // CSS 클래스 적용
+    if (this.options.trailClassName) {
+      this.trail.setAttribute("class", this.options.trailClassName);
+    }
+
+    // 인라인 스타일 설정 (비활성화되지 않은 경우에만)
+    if (!this.options.disableInlineStyles) {
+      this.trail.setAttribute("stroke", this.resolveColor(this.options.trailColor!, 0));
+      this.trail.setAttribute("stroke-width", this.options.trailWidth!.toString());
+    }
 
     // 게이지 원 생성 (진행률 표시)
     this.gauge = document.createElementNS("http://www.w3.org/2000/svg", "circle");
@@ -133,12 +159,21 @@ export class CircularProgressBar {
     this.gauge.setAttribute("cy", centerY.toString());
     this.gauge.setAttribute("r", gaugeRadius.toString());
     this.gauge.setAttribute("fill", "none");
-    this.gauge.setAttribute("stroke", this.resolveColor(this.options.gaugeColor!, 0)); // 초기 진행률 0으로 색상 해석
-    this.gauge.setAttribute("stroke-width", this.options.gaugeWidth!.toString());
-    this.gauge.setAttribute(
-      "stroke-linecap",
-      this.options.gaugeType === "round" ? "round" : "butt"
-    ); // 게이지 타입에 따라 선 끝 모양 설정
+
+    // CSS 클래스 적용
+    if (this.options.gaugeClassName) {
+      this.gauge.setAttribute("class", this.options.gaugeClassName);
+    }
+
+    // 인라인 스타일 설정 (비활성화되지 않은 경우에만)
+    if (!this.options.disableInlineStyles) {
+      this.gauge.setAttribute("stroke", this.resolveColor(this.options.gaugeColor!, 0));
+      this.gauge.setAttribute("stroke-width", this.options.gaugeWidth!.toString());
+      this.gauge.setAttribute(
+        "stroke-linecap",
+        this.options.gaugeType === "round" ? "round" : "butt"
+      );
+    }
 
     // stroke-dasharray를 원의 둘레로 고정하고 stroke-dashoffset으로 애니메이션 제어
     const circumference = 2 * Math.PI * gaugeRadius;
@@ -154,11 +189,21 @@ export class CircularProgressBar {
 
     // 텍스트 요소 생성
     this.text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-    this.text.setAttribute("fill", this.options.textColor!);
-    this.text.setAttribute("font-size", this.options.textSize!.toString());
-    this.text.setAttribute("font-family", this.options.textFont!);
-    this.text.setAttribute("text-anchor", "middle"); // 텍스트 중앙 정렬
-    this.text.setAttribute("dominant-baseline", "middle"); // 세로 중앙 정렬
+
+    // CSS 클래스 적용
+    if (this.options.textClassName) {
+      this.text.setAttribute("class", this.options.textClassName);
+    }
+
+    // 인라인 스타일 설정 (비활성화되지 않은 경우에만)
+    if (!this.options.disableInlineStyles) {
+      this.text.setAttribute("fill", this.options.textColor!);
+      this.text.setAttribute("font-size", this.options.textSize!.toString());
+      this.text.setAttribute("font-family", this.options.textFont!);
+      this.text.setAttribute("text-anchor", "middle");
+      this.text.setAttribute("dominant-baseline", "middle");
+    }
+
     this.text.setAttribute("x", "0");
     this.text.setAttribute("y", "0");
 
@@ -190,12 +235,14 @@ export class CircularProgressBar {
     const progress = Math.min(Math.max(this.options.value / this.options.maxValue, 0), 1);
     const dashLength = circumference * progress; // 표시할 선의 길이
 
-    // 색상 동적 업데이트 (함수인 경우에만)
-    if (typeof this.options.gaugeColor === "function") {
-      this.gauge.setAttribute("stroke", this.resolveColor(this.options.gaugeColor, progress));
-    }
-    if (typeof this.options.trailColor === "function") {
-      this.trail.setAttribute("stroke", this.resolveColor(this.options.trailColor, progress));
+    // 색상 동적 업데이트 (함수인 경우에만, 인라인 스타일이 활성화된 경우에만)
+    if (!this.options.disableInlineStyles) {
+      if (typeof this.options.gaugeColor === "function") {
+        this.gauge.setAttribute("stroke", this.resolveColor(this.options.gaugeColor, progress));
+      }
+      if (typeof this.options.trailColor === "function") {
+        this.trail.setAttribute("stroke", this.resolveColor(this.options.trailColor, progress));
+      }
     }
 
     // 게이지 업데이트 - stroke-dashoffset으로 애니메이션 제어
@@ -359,5 +406,99 @@ export class CircularProgressBar {
    */
   public getTrailColor(): ColorValue {
     return this.options.trailColor!;
+  }
+
+  /**
+   * SVG 요소에 CSS 클래스를 설정합니다.
+   * @param className - CSS 클래스명
+   */
+  public setClassName(className: string) {
+    this.options.className = className;
+    this.svg.setAttribute("class", className);
+  }
+
+  /**
+   * 게이지 원에 CSS 클래스를 설정합니다.
+   * @param className - CSS 클래스명
+   */
+  public setGaugeClassName(className: string) {
+    this.options.gaugeClassName = className;
+    this.gauge.setAttribute("class", className);
+  }
+
+  /**
+   * 트레일 원에 CSS 클래스를 설정합니다.
+   * @param className - CSS 클래스명
+   */
+  public setTrailClassName(className: string) {
+    this.options.trailClassName = className;
+    this.trail.setAttribute("class", className);
+  }
+
+  /**
+   * 텍스트에 CSS 클래스를 설정합니다.
+   * @param className - CSS 클래스명
+   */
+  public setTextClassName(className: string) {
+    this.options.textClassName = className;
+    this.text.setAttribute("class", className);
+  }
+
+  /**
+   * 인라인 스타일 활성화/비활성화를 설정합니다.
+   * @param disable - true면 인라인 스타일 비활성화, false면 활성화
+   */
+  public setDisableInlineStyles(disable: boolean) {
+    this.options.disableInlineStyles = disable;
+    // 필요시 스타일 재적용
+    if (!disable) {
+      this.render();
+    }
+  }
+
+  /**
+   * 현재 CSS 클래스 설정을 반환합니다.
+   * @returns CSS 클래스 설정 객체
+   */
+  public getClassNames() {
+    return {
+      className: this.options.className,
+      gaugeClassName: this.options.gaugeClassName,
+      trailClassName: this.options.trailClassName,
+      textClassName: this.options.textClassName,
+    };
+  }
+
+  /**
+   * SVG 요소를 반환합니다.
+   * 외부에서 직접 스타일링할 때 사용합니다.
+   * @returns SVG 요소
+   */
+  public getSVGElement(): SVGElement {
+    return this.svg;
+  }
+
+  /**
+   * 게이지 원 요소를 반환합니다.
+   * @returns 게이지 원 요소
+   */
+  public getGaugeElement(): SVGPathElement {
+    return this.gauge;
+  }
+
+  /**
+   * 트레일 원 요소를 반환합니다.
+   * @returns 트레일 원 요소
+   */
+  public getTrailElement(): SVGPathElement {
+    return this.trail;
+  }
+
+  /**
+   * 텍스트 요소를 반환합니다.
+   * @returns 텍스트 요소
+   */
+  public getTextElement(): SVGTextElement {
+    return this.text;
   }
 }
