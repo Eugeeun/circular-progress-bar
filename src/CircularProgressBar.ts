@@ -7,6 +7,7 @@ interface CircularProgressBarOptions {
   size: number; // SVG 크기 (픽셀)
   gaugeWidth?: number; // 게이지 선 두께 (기본값: 12)
   gaugeColor?: string; // 게이지 색상 (기본값: "#2196f3")
+  gaugeType?: "round" | "flat"; // 게이지 끝 모양 (기본값: 'round')
   trailWidth?: number; // 배경 트레일 선 두께 (기본값: 12)
   trailColor?: string; // 배경 트레일 색상 (기본값: "#e0e0e0")
   textColor?: string; // 텍스트 색상 (기본값: "#333")
@@ -39,6 +40,7 @@ export class CircularProgressBar {
     this.options = {
       gaugeWidth: 12,
       gaugeColor: "#2196f3",
+      gaugeType: "round",
       trailWidth: 12,
       trailColor: "#e0e0e0",
       textColor: "#333",
@@ -92,7 +94,10 @@ export class CircularProgressBar {
     this.gauge.setAttribute("fill", "none");
     this.gauge.setAttribute("stroke", this.options.gaugeColor!);
     this.gauge.setAttribute("stroke-width", this.options.gaugeWidth!.toString());
-    this.gauge.setAttribute("stroke-linecap", "round"); // 선 끝을 둥글게
+    this.gauge.setAttribute(
+      "stroke-linecap",
+      this.options.gaugeType === "round" ? "round" : "butt"
+    ); // 게이지 타입에 따라 선 끝 모양 설정
     this.gauge.style.strokeDasharray = "0 1000"; // 초기값: 진행률 0%
 
     // 텍스트 컨테이너 그룹 생성
