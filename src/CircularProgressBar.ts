@@ -1,4 +1,9 @@
 /**
+ * 색상 타입 정의
+ */
+type ColorValue = string | ((progress: number) => string);
+
+/**
  * 원형 프로그레스 바의 설정 옵션 인터페이스
  */
 interface CircularProgressBarOptions {
@@ -7,10 +12,10 @@ interface CircularProgressBarOptions {
   size?: number; // SVG 크기 (픽셀, 기본값: 컨테이너의 최소 크기)
   responsive?: boolean; // 반응형 모드 (기본값: false)
   gaugeWidth?: number; // 게이지 선 두께 (기본값: 12)
-  gaugeColor?: string; // 게이지 색상 (기본값: "#2196f3")
+  gaugeColor?: ColorValue; // 게이지 색상 (기본값: "#2196f3")
   gaugeType?: "round" | "flat"; // 게이지 끝 모양 (기본값: 'round')
   trailWidth?: number; // 배경 트레일 선 두께 (기본값: 12)
-  trailColor?: string; // 배경 트레일 색상 (기본값: "#e0e0e0")
+  trailColor?: ColorValue; // 배경 트레일 색상 (기본값: "#e0e0e0")
   textColor?: string; // 텍스트 색상 (기본값: "#333")
   text?: string; // 표시할 텍스트 (기본값: 퍼센트)
   textSize?: number; // 텍스트 크기 (기본값: 24)
@@ -71,6 +76,20 @@ export class CircularProgressBar {
   }
 
   /**
+   * 색상 값을 해석합니다.
+   * 문자열이면 그대로 반환하고, 함수면 현재 진행률을 기반으로 색상을 계산합니다.
+   * @param colorValue - 색상 값 (문자열 또는 함수)
+   * @param progress - 현재 진행률 (0~1)
+   * @returns 해석된 색상 문자열
+   */
+  private resolveColor(colorValue: ColorValue, progress: number): string {
+    if (typeof colorValue === "function") {
+      return colorValue(progress);
+    }
+    return colorValue;
+  }
+
+  /**
    * SVG 요소와 원형 프로그레스 바를 초기화합니다.
    * 바깥쪽 라인이 일치하도록 반지름을 조정합니다.
    */
@@ -105,7 +124,7 @@ export class CircularProgressBar {
     this.trail.setAttribute("cy", centerY.toString());
     this.trail.setAttribute("r", trailRadius.toString());
     this.trail.setAttribute("fill", "none");
-    this.trail.setAttribute("stroke", this.options.trailColor!);
+    this.trail.setAttribute("stroke", this.resolveColor(this.options.trailColor!, 0)); // 초기 진행률 0으로 색상 해석
     this.trail.setAttribute("stroke-width", this.options.trailWidth!.toString());
 
     // 게이지 원 생성 (진행률 표시)
@@ -114,7 +133,7 @@ export class CircularProgressBar {
     this.gauge.setAttribute("cy", centerY.toString());
     this.gauge.setAttribute("r", gaugeRadius.toString());
     this.gauge.setAttribute("fill", "none");
-    this.gauge.setAttribute("stroke", this.options.gaugeColor!);
+    this.gauge.setAttribute("stroke", this.resolveColor(this.options.gaugeColor!, 0)); // 초기 진행률 0으로 색상 해석
     this.gauge.setAttribute("stroke-width", this.options.gaugeWidth!.toString());
     this.gauge.setAttribute(
       "stroke-linecap",
@@ -170,6 +189,14 @@ export class CircularProgressBar {
     // 진행률 계산 (0~1 사이 값으로 정규화)
     const progress = Math.min(Math.max(this.options.value / this.options.maxValue, 0), 1);
     const dashLength = circumference * progress; // 표시할 선의 길이
+
+    // 색상 동적 업데이트 (함수인 경우에만)
+    if (typeof this.options.gaugeColor === "function") {
+      this.gauge.setAttribute("stroke", this.resolveColor(this.options.gaugeColor, progress));
+    }
+    if (typeof this.options.trailColor === "function") {
+      this.trail.setAttribute("stroke", this.resolveColor(this.options.trailColor, progress));
+    }
 
     // 게이지 업데이트 - stroke-dashoffset으로 애니메이션 제어
     this.gauge.style.strokeDasharray = circumference.toString();
@@ -296,5 +323,41 @@ export class CircularProgressBar {
       this.resizeObserver.disconnect();
       this.resizeObserver = undefined;
     }
+  }
+
+  /**
+   * 게이지 색상을 동적으로 업데이트합니다.
+   * @param color - 새로운 색상 (문자열 또는 함수)
+   */
+  public setGaugeColor(color: ColorValue) {
+    this.options.gaugeColor = color;
+    const progress = Math.min(Math.max(this.options.value / this.options.maxValue, 0), 1);
+    this.gauge.setAttribute("stroke", this.resolveColor(color, progress));
+  }
+
+  /**
+   * 트레일 색상을 동적으로 업데이트합니다.
+   * @param color - 새로운 색상 (문자열 또는 함수)
+   */
+  public setTrailColor(color: ColorValue) {
+    this.options.trailColor = color;
+    const progress = Math.min(Math.max(this.options.value / this.options.maxValue, 0), 1);
+    this.trail.setAttribute("stroke", this.resolveColor(color, progress));
+  }
+
+  /**
+   * 현재 게이지 색상을 반환합니다.
+   * @returns 현재 게이지 색상 설정
+   */
+  public getGaugeColor(): ColorValue {
+    return this.options.gaugeColor!;
+  }
+
+  /**
+   * 현재 트레일 색상을 반환합니다.
+   * @returns 현재 트레일 색상 설정
+   */
+  public getTrailColor(): ColorValue {
+    return this.options.trailColor!;
   }
 }
