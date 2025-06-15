@@ -118,7 +118,11 @@ export class CircularProgressBar {
       "stroke-linecap",
       this.options.gaugeType === "round" ? "round" : "butt"
     ); // 게이지 타입에 따라 선 끝 모양 설정
-    this.gauge.style.strokeDasharray = "0 1000"; // 초기값: 진행률 0%
+
+    // stroke-dasharray를 원의 둘레로 고정하고 stroke-dashoffset으로 애니메이션 제어
+    const circumference = 2 * Math.PI * gaugeRadius;
+    this.gauge.style.strokeDasharray = circumference.toString();
+    this.gauge.style.strokeDashoffset = circumference.toString(); // 초기값: 진행률 0%
 
     // 텍스트 컨테이너 그룹 생성
     const textGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
@@ -152,7 +156,7 @@ export class CircularProgressBar {
 
   /**
    * 현재 값에 따라 프로그레스 바를 렌더링합니다.
-   * 게이지의 stroke-dasharray를 조정하여 진행률을 표시합니다.
+   * stroke-dashoffset을 조정하여 진행률을 표시합니다.
    */
   private render() {
     // initialize 메서드와 동일한 반지름 계산 로직 사용
@@ -165,9 +169,10 @@ export class CircularProgressBar {
     const progress = Math.min(Math.max(this.options.value / this.options.maxValue, 0), 1);
     const dashLength = circumference * progress; // 표시할 선의 길이
 
-    // 게이지 업데이트
-    this.gauge.style.strokeDasharray = `${dashLength} ${circumference}`;
-    this.gauge.style.transition = `stroke-dasharray ${this.options.duration}ms ease-in-out`;
+    // 게이지 업데이트 - stroke-dashoffset으로 애니메이션 제어
+    this.gauge.style.strokeDasharray = circumference.toString();
+    this.gauge.style.strokeDashoffset = (circumference - dashLength).toString();
+    this.gauge.style.transition = `stroke-dashoffset ${this.options.duration}ms ease-in-out`;
 
     // 텍스트 내용 설정
     const displayText = this.options.text ?? `${Math.round(progress * 100)}%`;
@@ -249,14 +254,19 @@ export class CircularProgressBar {
     this.gauge.setAttribute("cy", centerY.toString());
     this.gauge.setAttribute("r", gaugeRadius.toString());
 
+    // stroke-dasharray와 stroke-dashoffset 재계산
+    const circumference = 2 * Math.PI * gaugeRadius;
+    const progress = Math.min(Math.max(this.options.value / this.options.maxValue, 0), 1);
+    const dashLength = circumference * progress;
+
+    this.gauge.style.strokeDasharray = circumference.toString();
+    this.gauge.style.strokeDashoffset = (circumference - dashLength).toString();
+
     // 텍스트 그룹 위치 업데이트
     const textGroup = this.svg.querySelector("g");
     if (textGroup) {
       textGroup.setAttribute("transform", `translate(${centerX}, ${centerY}) rotate(90)`);
     }
-
-    // 진행률 다시 렌더링
-    this.render();
   }
 
   /**
