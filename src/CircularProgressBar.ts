@@ -15,6 +15,7 @@ interface CircularProgressBarOptions {
   text?: string; // 표시할 텍스트 (기본값: 퍼센트)
   textSize?: number; // 텍스트 크기 (기본값: 24)
   textFont?: string; // 텍스트 폰트 (기본값: "Arial")
+  animate?: boolean; // 애니메이션 활성화 (기본값: true)
   duration?: number; // 애니메이션 지속 시간 (기본값: 800ms)
 }
 
@@ -50,6 +51,7 @@ export class CircularProgressBar {
       textColor: "#333",
       textSize: 24,
       textFont: "Arial",
+      animate: true,
       duration: 800,
       ...options,
     };
@@ -172,7 +174,13 @@ export class CircularProgressBar {
     // 게이지 업데이트 - stroke-dashoffset으로 애니메이션 제어
     this.gauge.style.strokeDasharray = circumference.toString();
     this.gauge.style.strokeDashoffset = (circumference - dashLength).toString();
-    this.gauge.style.transition = `stroke-dashoffset ${this.options.duration}ms ease-in-out`;
+
+    // 애니메이션 설정 (animate 옵션이 true이고 duration이 0보다 클 때만)
+    if (this.options.animate && this.options.duration! > 0) {
+      this.gauge.style.transition = `stroke-dashoffset ${this.options.duration}ms ease-in-out`;
+    } else {
+      this.gauge.style.transition = "none"; // 애니메이션 비활성화
+    }
 
     // 텍스트 내용 설정
     const displayText = this.options.text ?? `${Math.round(progress * 100)}%`;
@@ -262,11 +270,21 @@ export class CircularProgressBar {
     this.gauge.style.strokeDasharray = circumference.toString();
     this.gauge.style.strokeDashoffset = (circumference - dashLength).toString();
 
+    // 리사이즈 시에는 애니메이션을 일시적으로 비활성화하여 부드러운 크기 조정
+    this.gauge.style.transition = "none";
+
     // 텍스트 그룹 위치 업데이트
     const textGroup = this.svg.querySelector("g");
     if (textGroup) {
       textGroup.setAttribute("transform", `translate(${centerX}, ${centerY}) rotate(90)`);
     }
+
+    // 리사이즈 완료 후 애니메이션 설정 복원
+    setTimeout(() => {
+      if (this.options.animate && this.options.duration! > 0) {
+        this.gauge.style.transition = `stroke-dashoffset ${this.options.duration}ms ease-in-out`;
+      }
+    }, 0);
   }
 
   /**
