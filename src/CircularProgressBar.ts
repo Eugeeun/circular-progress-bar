@@ -4,7 +4,8 @@
 interface CircularProgressBarOptions {
   value: number; // 현재 값
   maxValue: number; // 최대 값
-  size: number; // SVG 크기 (픽셀)
+  size?: number; // SVG 크기 (픽셀, 기본값: 컨테이너의 최소 크기)
+  responsive?: boolean; // 반응형 모드 (기본값: false)
   gaugeWidth?: number; // 게이지 선 두께 (기본값: 12)
   gaugeColor?: string; // 게이지 색상 (기본값: "#2196f3")
   gaugeType?: "round" | "flat"; // 게이지 끝 모양 (기본값: 'round')
@@ -28,6 +29,8 @@ export class CircularProgressBar {
   private gauge!: SVGPathElement; // 게이지 원 (진행률 표시)
   private trail!: SVGPathElement; // 트레일 원 (배경)
   private text!: SVGTextElement; // 텍스트 요소
+  private resizeObserver?: ResizeObserver; // 컨테이너 크기 변화 감지용
+  private currentSize: number = 0; // 현재 SVG 크기
 
   /**
    * CircularProgressBar 생성자
@@ -38,6 +41,7 @@ export class CircularProgressBar {
     this.container = container;
     // 기본값과 사용자 옵션을 병합
     this.options = {
+      responsive: false,
       gaugeWidth: 12,
       gaugeColor: "#2196f3",
       gaugeType: "round",
@@ -50,8 +54,18 @@ export class CircularProgressBar {
       ...options,
     };
 
+    // 반응형 모드일 때 size가 없으면 컨테이너 크기로 설정
+    if (this.options.responsive && !this.options.size) {
+      this.options.size = this.getContainerSize();
+    }
+
     this.initialize();
     this.render();
+
+    // 반응형 모드일 때 ResizeObserver 설정
+    if (this.options.responsive) {
+      this.setupResizeObserver();
+    }
   }
 
   /**
@@ -59,6 +73,12 @@ export class CircularProgressBar {
    * 바깥쪽 라인이 일치하도록 반지름을 조정합니다.
    */
   private initialize() {
+    // 초기 크기 설정
+    if (!this.options.size) {
+      this.options.size = this.getContainerSize();
+    }
+    this.currentSize = this.options.size;
+
     // SVG 요소 생성
     this.svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
     this.svg.setAttribute("width", this.options.size.toString());
@@ -137,7 +157,7 @@ export class CircularProgressBar {
   private render() {
     // initialize 메서드와 동일한 반지름 계산 로직 사용
     const maxStrokeWidth = Math.max(this.options.gaugeWidth!, this.options.trailWidth!);
-    const baseRadius = (this.options.size - maxStrokeWidth) / 2;
+    const baseRadius = (this.currentSize - maxStrokeWidth) / 2;
     const gaugeRadius = baseRadius + (maxStrokeWidth - this.options.gaugeWidth!) / 2;
     const circumference = 2 * Math.PI * gaugeRadius; // 원의 둘레
 
@@ -169,5 +189,84 @@ export class CircularProgressBar {
    */
   public getValue(): number {
     return this.options.value;
+  }
+
+  /**
+   * 컨테이너의 크기를 가져옵니다.
+   * @returns 컨테이너의 최소 크기 (가로, 세로 중 작은 값)
+   */
+  private getContainerSize(): number {
+    const rect = this.container.getBoundingClientRect();
+    return Math.min(rect.width, rect.height);
+  }
+
+  /**
+   * ResizeObserver를 설정하여 컨테이너 크기 변화를 감지합니다.
+   */
+  private setupResizeObserver() {
+    if (typeof ResizeObserver !== "undefined") {
+      this.resizeObserver = new ResizeObserver(entries => {
+        for (const entry of entries) {
+          const newSize = Math.min(entry.contentRect.width, entry.contentRect.height);
+          if (newSize !== this.currentSize && newSize > 0) {
+            this.resize(newSize);
+          }
+        }
+      });
+      this.resizeObserver.observe(this.container);
+    }
+  }
+
+  /**
+   * SVG 크기를 조정합니다.
+   * @param newSize - 새로운 크기
+   */
+  private resize(newSize: number) {
+    this.currentSize = newSize;
+    this.options.size = newSize;
+
+    // SVG 크기 업데이트
+    this.svg.setAttribute("width", newSize.toString());
+    this.svg.setAttribute("height", newSize.toString());
+    this.svg.setAttribute("viewBox", `0 0 ${newSize} ${newSize}`);
+
+    // 원들의 위치와 크기 재계산
+    const maxStrokeWidth = Math.max(this.options.gaugeWidth!, this.options.trailWidth!);
+    const baseRadius = (newSize - maxStrokeWidth) / 2;
+    const centerX = newSize / 2;
+    const centerY = newSize / 2;
+
+    const trailRadius = baseRadius + (maxStrokeWidth - this.options.trailWidth!) / 2;
+    const gaugeRadius = baseRadius + (maxStrokeWidth - this.options.gaugeWidth!) / 2;
+
+    // 트레일 원 업데이트
+    this.trail.setAttribute("cx", centerX.toString());
+    this.trail.setAttribute("cy", centerY.toString());
+    this.trail.setAttribute("r", trailRadius.toString());
+
+    // 게이지 원 업데이트
+    this.gauge.setAttribute("cx", centerX.toString());
+    this.gauge.setAttribute("cy", centerY.toString());
+    this.gauge.setAttribute("r", gaugeRadius.toString());
+
+    // 텍스트 그룹 위치 업데이트
+    const textGroup = this.svg.querySelector("g");
+    if (textGroup) {
+      textGroup.setAttribute("transform", `translate(${centerX}, ${centerY}) rotate(90)`);
+    }
+
+    // 진행률 다시 렌더링
+    this.render();
+  }
+
+  /**
+   * 인스턴스를 정리합니다.
+   * ResizeObserver를 해제합니다.
+   */
+  public destroy() {
+    if (this.resizeObserver) {
+      this.resizeObserver.disconnect();
+      this.resizeObserver = undefined;
+    }
   }
 }
