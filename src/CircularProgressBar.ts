@@ -119,10 +119,7 @@ export class CircularProgressBar {
       this.svg.setAttribute("class", this.options.className);
     }
 
-    // 인라인 스타일 설정 (비활성화되지 않은 경우에만)
-    if (!this.options.disableInlineStyles) {
-      this.svg.style.transform = "rotate(-90deg)"; // 상단에서 시작하도록 -90도 회전
-    }
+    this.svg.style.transform = "rotate(-90deg)"; // 상단에서 시작하도록 -90도 회전
 
     // 기본 반지름과 중심점 계산
     const maxStrokeWidth = Math.max(this.options.gaugeWidth!, this.options.trailWidth!);

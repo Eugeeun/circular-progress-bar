@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Circular Progress Bar - Tailwind CSS 예시</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      // Tailwind CSS 설정 - stroke-linecap 클래스 추가
+      tailwind.config = {
+        theme: {
+          extend: {
+            strokeLinecap: {
+              round: "round",
+              square: "square",
+              butt: "butt",
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      /* 커스텀 CSS 클래스 */
+      .progress-gauge {
+        transition: stroke-dashoffset 0.8s ease-in-out;
+      }
+
+      .progress-trail {
+        opacity: 0.2;
+      }
+
+      .progress-text {
+        font-weight: 600;
+        text-anchor: middle;
+        dominant-baseline: middle;
+      }
+
+      /* 애니메이션 효과 */
+      .progress-container {
+        transition: transform 0.3s ease-in-out;
+      }
+
+      .progress-container:hover {
+        transform: scale(1.05);
+      }
+
+      /* stroke-linecap을 위한 커스텀 클래스 */
+      .stroke-linecap-round {
+        stroke-linecap: round;
+      }
+
+      .stroke-linecap-square {
+        stroke-linecap: square;
+      }
+
+      .stroke-linecap-butt {
+        stroke-linecap: butt;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 min-h-screen p-8">
+    <div class="max-w-6xl mx-auto">
+      <h1 class="text-4xl font-bold text-center mb-8 text-gray-800">
+        Circular Progress Bar - Tailwind CSS 예시
+      </h1>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <!-- 기본 스타일 -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+          <h3 class="text-lg font-semibold mb-4 text-gray-700">기본 스타일</h3>
+          <div id="basic-progress" class="w-32 h-32 mx-auto"></div>
+          <div class="mt-4 text-center">
+            <button
+              onclick="updateProgress('basic-progress')"
+              class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded"
+            >
+              값 변경
+            </button>
+          </div>
+        </div>
+
+        <!-- Tailwind 클래스 적용 -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+          <h3 class="text-lg font-semibold mb-4 text-gray-700">Tailwind 클래스</h3>
+          <div id="tailwind-progress" class="w-32 h-32 mx-auto"></div>
+          <div class="mt-4 text-center">
+            <button
+              onclick="updateProgress('tailwind-progress')"
+              class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded"
+            >
+              값 변경
+            </button>
+          </div>
+        </div>
+
+        <!-- 커스텀 스타일 (Round) -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+          <h3 class="text-lg font-semibold mb-4 text-gray-700">Round 스타일</h3>
+          <div id="round-progress" class="w-32 h-32 mx-auto"></div>
+          <div class="mt-4 text-center">
+            <button
+              onclick="updateProgress('round-progress')"
+              class="bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded"
+            >
+              값 변경
+            </button>
+          </div>
+        </div>
+
+        <!-- 반응형 -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+          <h3 class="text-lg font-semibold mb-4 text-gray-700">반응형</h3>
+          <div id="responsive-progress" class="w-full h-32"></div>
+          <div class="mt-4 text-center">
+            <button
+              onclick="updateProgress('responsive-progress')"
+              class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded"
+            >
+              값 변경
+            </button>
+          </div>
+        </div>
+
+        <!-- 동적 색상 -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+          <h3 class="text-lg font-semibold mb-4 text-gray-700">동적 색상</h3>
+          <div id="dynamic-progress" class="w-32 h-32 mx-auto"></div>
+          <div class="mt-4 text-center">
+            <button
+              onclick="updateProgress('dynamic-progress')"
+              class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
+            >
+              값 변경
+            </button>
+          </div>
+        </div>
+
+        <!-- 애니메이션 효과 -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+          <h3 class="text-lg font-semibold mb-4 text-gray-700">애니메이션</h3>
+          <div id="animated-progress" class="w-32 h-32 mx-auto progress-container"></div>
+          <div class="mt-4 text-center">
+            <button
+              onclick="updateProgress('animated-progress')"
+              class="bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded"
+            >
+              값 변경
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- stroke-linecap 비교 섹션 -->
+      <div class="mt-12">
+        <h2 class="text-2xl font-bold text-center mb-8 text-gray-800">
+          stroke-linecap 스타일 비교
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <!-- Round -->
+          <div class="bg-white rounded-lg shadow-lg p-6">
+            <h3 class="text-lg font-semibold mb-4 text-gray-700">Round (둥근 끝)</h3>
+            <div id="round-cap-progress" class="w-32 h-32 mx-auto"></div>
+            <p class="text-sm text-gray-600 mt-2 text-center">stroke-linecap: round</p>
+          </div>
+
+          <!-- Square -->
+          <div class="bg-white rounded-lg shadow-lg p-6">
+            <h3 class="text-lg font-semibold mb-4 text-gray-700">Square (사각 끝)</h3>
+            <div id="square-cap-progress" class="w-32 h-32 mx-auto"></div>
+            <p class="text-sm text-gray-600 mt-2 text-center">stroke-linecap: square</p>
+          </div>
+
+          <!-- Butt -->
+          <div class="bg-white rounded-lg shadow-lg p-6">
+            <h3 class="text-lg font-semibold mb-4 text-gray-700">Butt (직선 끝)</h3>
+            <div id="butt-cap-progress" class="w-32 h-32 mx-auto"></div>
+            <p class="text-sm text-gray-600 mt-2 text-center">stroke-linecap: butt</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { CircularProgressBar } from "../src/CircularProgressBar.js";
+
+      // 프로그레스 바 인스턴스들을 저장할 객체
+      const progressBars = {};
+
+      // 기본 스타일
+      progressBars["basic-progress"] = new CircularProgressBar(
+        document.getElementById("basic-progress"),
+        {
+          value: 25,
+          maxValue: 100,
+          size: 128,
+          gaugeWidth: 18,
+          gaugeColor: "#3b82f6",
+          trailColor: "#e5e7eb",
+          trailWidth: 12,
+          text: "25%",
+          textSize: 16,
+          textColor: "#374151",
+          disableInlineStyles: false,
+        }
+      );
+
+      // Tailwind 클래스 적용
+      progressBars["tailwind-progress"] = new CircularProgressBar(
+        document.getElementById("tailwind-progress"),
+        {
+          value: 50,
+          maxValue: 100,
+          size: 128,
+          gaugeWidth: 12,
+          gaugeColor: "#10b981",
+          trailColor: "#d1fae5",
+          text: "50%",
+          textSize: 18,
+          textColor: "#065f46",
+          className: "shadow-lg rounded-full",
+          gaugeClassName: "progress-gauge stroke-green-500 stroke-[12]",
+          trailClassName: "progress-trail stroke-green-300 stroke-[12]",
+          textClassName: "progress-text fill-green-800 font-bold",
+          disableInlineStyles: true,
+        }
+      );
+
+      // Round 스타일 (커스텀 CSS 클래스 사용)
+      progressBars["round-progress"] = new CircularProgressBar(
+        document.getElementById("round-progress"),
+        {
+          value: 75,
+          maxValue: 100,
+          size: 128,
+          gaugeWidth: 16,
+          gaugeColor: "#8b5cf6",
+          trailColor: "#ede9fe",
+          text: "75%",
+          textSize: 20,
+          textColor: "#5b21b6",
+          gaugeType: "round", // 라이브러리 내장 옵션 사용
+          className: "drop-shadow-lg",
+          gaugeClassName: "progress-gauge stroke-purple-500 stroke-[16] stroke-linecap-round",
+          trailClassName: "progress-trail stroke-purple-300 stroke-[16] stroke-linecap-round",
+          textClassName: "progress-text fill-purple-800 font-bold",
+          disableInlineStyles: true,
+        }
+      );
+
+      // 반응형
+      progressBars["responsive-progress"] = new CircularProgressBar(
+        document.getElementById("responsive-progress"),
+        {
+          value: 60,
+          maxValue: 100,
+          responsive: true,
+          gaugeWidth: 12,
+          gaugeColor: "#f59e0b",
+          trailColor: "#fef3c7",
+          text: "60%",
+          textSize: 24,
+          textColor: "#92400e",
+          className: "w-full h-full",
+          gaugeClassName: "progress-gauge stroke-amber-500 stroke-[12] stroke-linecap-round",
+          trailClassName: "progress-trail stroke-amber-300 stroke-[12] stroke-linecap-round",
+          textClassName: "progress-text fill-amber-800 font-bold",
+          disableInlineStyles: true,
+        }
+      );
+
+      // 동적 색상
+      progressBars["dynamic-progress"] = new CircularProgressBar(
+        document.getElementById("dynamic-progress"),
+        {
+          value: 30,
+          maxValue: 100,
+          size: 128,
+          gaugeWidth: 12,
+          gaugeColor: progress => {
+            if (progress < 0.3) return "#ef4444"; // red-500
+            if (progress < 0.7) return "#f59e0b"; // amber-500
+            return "#10b981"; // emerald-500
+          },
+          trailColor: progress => `rgba(239, 68, 68, ${0.1 + progress * 0.2})`,
+          text: "30%",
+          textSize: 16,
+          textColor: "#991b1b",
+          className: "shadow-md",
+          gaugeClassName: "progress-gauge stroke-linecap-round",
+          trailClassName: "progress-trail stroke-linecap-round",
+          textClassName: "progress-text fill-red-800 font-semibold",
+          disableInlineStyles: false, // 동적 색상을 위해 인라인 스타일 유지
+        }
+      );
+
+      // 애니메이션 효과
+      progressBars["animated-progress"] = new CircularProgressBar(
+        document.getElementById("animated-progress"),
+        {
+          value: 40,
+          maxValue: 100,
+          size: 128,
+          gaugeWidth: 14,
+          gaugeColor: "#6366f1",
+          trailColor: "#e0e7ff",
+          text: "40%",
+          textSize: 18,
+          textColor: "#3730a3",
+          animate: true,
+          duration: 1200,
+          className: "transition-transform duration-300",
+          gaugeClassName: "progress-gauge stroke-indigo-500 stroke-[14] stroke-linecap-round",
+          trailClassName: "progress-trail stroke-indigo-300 stroke-[14] stroke-linecap-round",
+          textClassName: "progress-text fill-indigo-800 font-bold",
+          disableInlineStyles: true,
+        }
+      );
+
+      // stroke-linecap 비교용
+      progressBars["round-cap-progress"] = new CircularProgressBar(
+        document.getElementById("round-cap-progress"),
+        {
+          value: 60,
+          maxValue: 100,
+          size: 128,
+          gaugeWidth: 16,
+          gaugeColor: "#10b981",
+          trailColor: "#d1fae5",
+          text: "60%",
+          textSize: 16,
+          textColor: "#065f46",
+          gaugeType: "round", // 라이브러리 내장 옵션
+          gaugeClassName: "progress-gauge stroke-emerald-500 stroke-[16] stroke-linecap-round",
+          trailClassName: "progress-trail stroke-emerald-200 stroke-[16] stroke-linecap-round",
+          textClassName: "progress-text fill-emerald-800 font-semibold",
+          disableInlineStyles: true,
+        }
+      );
+
+      progressBars["square-cap-progress"] = new CircularProgressBar(
+        document.getElementById("square-cap-progress"),
+        {
+          value: 60,
+          maxValue: 100,
+          gaugeColor: "#f59e0b",
+          trailColor: "#fef3c7",
+          text: "60%",
+          textSize: 16,
+          textColor: "#92400e",
+          gaugeType: "flat", // 라이브러리 내장 옵션
+          gaugeClassName: "progress-gauge stroke-amber-500 stroke-[12] stroke-linecap-square",
+          trailClassName: "progress-trail stroke-amber-200 stroke-[12] stroke-linecap-square",
+          textClassName: "progress-text fill-amber-800 font-semibold",
+          disableInlineStyles: true,
+        }
+      );
+
+      progressBars["butt-cap-progress"] = new CircularProgressBar(
+        document.getElementById("butt-cap-progress"),
+        {
+          value: 60,
+          maxValue: 100,
+          gaugeColor: "#ef4444",
+          trailColor: "#fee2e2",
+          text: "60%",
+          textSize: 16,
+          textColor: "#991b1b",
+          gaugeType: "flat", // 라이브러리 내장 옵션
+          gaugeClassName: "progress-gauge stroke-red-500 stroke-[12] stroke-linecap-butt",
+          trailClassName: "progress-trail stroke-red-200 stroke-[12] stroke-linecap-butt",
+          textClassName: "progress-text fill-red-800 font-semibold",
+          disableInlineStyles: true,
+        }
+      );
+
+      // 전역 함수로 등록
+      window.updateProgress = function (containerId) {
+        const progressBar = progressBars[containerId];
+        if (progressBar) {
+          const currentValue = progressBar.getValue();
+          const newValue = (currentValue + 25) % 100;
+          progressBar.setValue(newValue);
+
+          // 텍스트 업데이트
+          const textElement = progressBar.getTextElement();
+          textElement.textContent = `${newValue}%`;
+        }
+      };
+
+      // 자동 애니메이션 (동적 색상 예시)
+      setInterval(() => {
+        const dynamicBar = progressBars["dynamic-progress"];
+        if (dynamicBar) {
+          const currentValue = dynamicBar.getValue();
+          const newValue = (currentValue + 5) % 100;
+          dynamicBar.setValue(newValue);
+
+          const textElement = dynamicBar.getTextElement();
+          textElement.textContent = `${newValue}%`;
+        }
+      }, 2000);
+    </script>
+  </body>
+</html>
