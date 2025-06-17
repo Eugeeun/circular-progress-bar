@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.1](https://github.com/yourusername/circular-progress-bar/compare/v0.1.0...v0.1.1) (2025-06-17)
+
+
+### Chores
+
+* Update package.json with new author and repository details, and modify build script ([5af029c](https://github.com/yourusername/circular-progress-bar/commit/5af029c55d63d7144efa2ac0a0351e392b1f175b))
+
 ## 0.1.0 (2025-06-17)
 
 
