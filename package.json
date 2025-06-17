@@ -1,5 +1,5 @@
 {
-  "name": "circular-progress-bar",
+  "name": "@eugeeun/circular-progress-bar",
   "private": false,
   "version": "0.1.1",
   "type": "module",
