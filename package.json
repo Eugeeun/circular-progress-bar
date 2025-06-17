@@ -1,7 +1,7 @@
 {
   "name": "@eugeeun/circular-progress-bar",
   "private": false,
-  "version": "0.1.1",
+  "version": "0.1.2",
   "type": "module",
   "description": "A lightweight, customizable circular progress bar component for web applications",
   "main": "dist/CircularProgressBar.js",

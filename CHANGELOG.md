@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.2](https://github.com/yourusername/circular-progress-bar/compare/v0.1.1...v0.1.2) (2025-06-17)
+
+
+### Chores
+
+* Rename package to @eugeeun/circular-progress-bar ([2f8c96d](https://github.com/yourusername/circular-progress-bar/commit/2f8c96d4cfe135f3d7168739b3a2457031e17f0d))
+
 ### [0.1.1](https://github.com/yourusername/circular-progress-bar/compare/v0.1.0...v0.1.1) (2025-06-17)
 
 
