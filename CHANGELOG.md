@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.3](https://github.com/yourusername/circular-progress-bar/compare/v0.1.2...v0.1.3) (2025-06-17)
+
+
+### Chores
+
+* Rename package to gojongwon-circular-progress-bar ([504d596](https://github.com/yourusername/circular-progress-bar/commit/504d5960da9f911a1b1d5c23666ec1326009711e))
+
 ### [0.1.2](https://github.com/yourusername/circular-progress-bar/compare/v0.1.1...v0.1.2) (2025-06-17)
 
 
