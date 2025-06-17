@@ -1,14 +1,56 @@
 {
   "name": "circular-progress-bar",
-  "private": true,
+  "private": false,
   "version": "0.0.0",
   "type": "module",
+  "description": "A lightweight, customizable circular progress bar component for web applications",
+  "main": "dist/CircularProgressBar.js",
+  "module": "dist/CircularProgressBar.js",
+  "types": "dist/CircularProgressBar.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/CircularProgressBar.js",
+      "types": "./dist/CircularProgressBar.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "circular",
+    "progress",
+    "bar",
+    "svg",
+    "typescript",
+    "component",
+    "gauge",
+    "animation"
+  ],
+  "author": "Your Name <your.email@example.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/circular-progress-bar.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/circular-progress-bar/issues"
+  },
+  "homepage": "https://github.com/yourusername/circular-progress-bar#readme",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "release": "standard-version",
+    "release:patch": "npm run release -- --release-as patch",
+    "release:minor": "npm run release -- --release-as minor",
+    "release:major": "npm run release -- --release-as major",
+    "prepublishOnly": "npm run build"
   },
   "devDependencies": {
+    "standard-version": "^9.5.0",
+    "terser": "^5.42.0",
     "typescript": "~5.8.3",
     "vite": "^6.3.5"
   }
