@@ -1,7 +1,7 @@
 {
   "name": "gojongwon-circular-progress-bar",
   "private": false,
-  "version": "0.1.3",
+  "version": "0.1.4",
   "type": "module",
   "description": "A lightweight, customizable circular progress bar component for web applications",
   "main": "dist/CircularProgressBar.js",
