@@ -99,7 +99,7 @@ export class CircularProgressBar {
 
   /**
    * SVG 요소와 원형 프로그레스 바를 초기화합니다.
-   * 바깥쪽 라인이 일치하도록 반지름을 조정합니다.
+   * 중심은 같고 너비의 중앙만 같도록 반지름을 조정합니다.
    */
   private initialize() {
     // 초기 크기 설정
@@ -121,16 +121,18 @@ export class CircularProgressBar {
 
     this.svg.style.transform = "rotate(-90deg)"; // 상단에서 시작하도록 -90도 회전
 
-    // 기본 반지름과 중심점 계산
-    const maxStrokeWidth = Math.max(this.options.gaugeWidth!, this.options.trailWidth!);
-    const baseRadius = (this.options.size - maxStrokeWidth) / 2;
+    // 중심점 계산
     const centerX = this.options.size / 2;
     const centerY = this.options.size / 2;
 
-    // 각 원의 반지름을 계산하여 바깥쪽 라인이 일치하도록 조정
-    // 더 얇은 선을 가진 원의 반지름을 늘려서 바깥쪽 라인을 맞춤
-    const trailRadius = baseRadius + (maxStrokeWidth - this.options.trailWidth!) / 2;
-    const gaugeRadius = baseRadius + (maxStrokeWidth - this.options.gaugeWidth!) / 2;
+    // 기본 반지름 계산 (가장 큰 stroke width를 고려하여 여백 확보)
+    const maxStrokeWidth = Math.max(this.options.gaugeWidth!, this.options.trailWidth!);
+    const baseRadius = (this.options.size - maxStrokeWidth) / 2;
+
+    // 각 원의 반지름을 개별적으로 계산
+    // 중심은 같고 각각의 stroke width 중앙이 같은 위치에 오도록 설정
+    const trailRadius = baseRadius;
+    const gaugeRadius = baseRadius;
 
     // 트레일 원 생성 (배경)
     this.trail = document.createElementNS("http://www.w3.org/2000/svg", "circle");
@@ -225,7 +227,7 @@ export class CircularProgressBar {
     // initialize 메서드와 동일한 반지름 계산 로직 사용
     const maxStrokeWidth = Math.max(this.options.gaugeWidth!, this.options.trailWidth!);
     const baseRadius = (this.currentSize - maxStrokeWidth) / 2;
-    const gaugeRadius = baseRadius + (maxStrokeWidth - this.options.gaugeWidth!) / 2;
+    const gaugeRadius = baseRadius; // gauge와 trail이 같은 반지름 사용
     const circumference = 2 * Math.PI * gaugeRadius; // 원의 둘레
 
     // 진행률 계산 (0~1 사이 값으로 정규화)
@@ -320,8 +322,8 @@ export class CircularProgressBar {
     const centerX = newSize / 2;
     const centerY = newSize / 2;
 
-    const trailRadius = baseRadius + (maxStrokeWidth - this.options.trailWidth!) / 2;
-    const gaugeRadius = baseRadius + (maxStrokeWidth - this.options.gaugeWidth!) / 2;
+    const trailRadius = baseRadius;
+    const gaugeRadius = baseRadius;
 
     // 트레일 원 업데이트
     this.trail.setAttribute("cx", centerX.toString());

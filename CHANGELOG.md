@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.4](https://github.com/yourusername/circular-progress-bar/compare/v0.1.3...v0.1.4) (2025-06-21)
+
+
+### Chores
+
+* Adjust radius calculations in CircularProgressBar for consistent stroke width alignment ([dd3ddef](https://github.com/yourusername/circular-progress-bar/commit/dd3ddefe2d5e69f6402b7c8f842d204603979e7c))
+
 ### [0.1.3](https://github.com/yourusername/circular-progress-bar/compare/v0.1.2...v0.1.3) (2025-06-17)
 
 
